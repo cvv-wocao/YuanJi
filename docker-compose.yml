@@ -2,39 +2,16 @@
 # 使用前：cp .env.example .env 并填好真实值，然后
 #     docker compose up -d --build
 #
-# 说明：
-# - 容器之间互相访问使用服务名（mysql / redis / ai），下面用 environment 覆盖 .env 里的 localhost。
-# - 按最小权限注入：只有 backend 使用整个 .env，ai / mysql 只拿到自己需要的那几个变量。
-# - 数据库表结构未随仓库提供（仓库内只有 long_term_memory.sql），首次启动后需自行导入。
-# - AI 服务的 SQLite 数据（running.db）保存在容器内，重建容器会丢失。
+# 组成：backend（Spring Boot :8080）+ ai（Python 姿态分析 :5002）
+#
+# MySQL / Redis 复用宿主机上已有的服务（通过 host.docker.internal 访问）：
+# 本机 3306 / 6379 已被占用，而且业务数据就在宿主机的 yuanji 库里。
+# 想要一套自包含的 MySQL / Redis，见文件末尾注释块。
+#
+# 注意：YOLO 模型 best.pt 未纳入 Git 仓库，需要本机存在 YOLO/best.pt，见下方挂载。
 name: rumbing
 
 services:
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: yuanji
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql-data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_PASSWORD}"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-
-  redis:
-    image: redis:7
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-
   ai:
     build: ./running
     environment:
@@ -45,6 +22,9 @@ services:
       SPARK_API_SECRET: ${SPARK_API_SECRET}
       SPARK_URL: ${SPARK_URL:-wss://spark-api.xf-yun.com/v1/x1}
       SPARK_DOMAIN: ${SPARK_DOMAIN:-x1}
+    volumes:
+      # RunningPoseModule 按 <项目根>/YOLO/best.pt 找模型；容器内项目根为 /
+      - ./YOLO/best.pt:/YOLO/best.pt:ro
     ports:
       - "5002:5002"
 
@@ -53,20 +33,42 @@ services:
     env_file:
       - .env
     environment:
-      # 覆盖 .env 中的 localhost / 内网地址，改为容器服务名
-      DB_URL: jdbc:mysql://mysql:3306/yuanji?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
-      REDIS_HOST: redis
+      # 覆盖 .env 里的 localhost / 内网地址
+      DB_URL: jdbc:mysql://host.docker.internal:3306/yuanji?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
+      REDIS_HOST: host.docker.internal
       PYTHON_API_URL: http://ai:5002/api/analyze/frame
+      PYTHON_API_BASE_URL: http://ai:5002
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "8080:8080"
     depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_started
-      ai:
-        condition: service_started
+      - ai
 
-volumes:
-  mysql-data:
-  redis-data:
+# ---------------------------------------------------------------------------
+# 可选：需要一套完全自包含的 MySQL / Redis 时取消注释。
+# 宿主机 3306 / 6379 已被占用，所以这里映射到 3307 / 6380。
+# ---------------------------------------------------------------------------
+#  mysql:
+#    image: mysql:8.0
+#    environment:
+#      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+#      MYSQL_DATABASE: yuanji
+#    command:
+#      - --character-set-server=utf8mb4
+#      - --collation-server=utf8mb4_unicode_ci
+#    ports:
+#      - "3307:3306"
+#    volumes:
+#      - mysql-data:/var/lib/mysql
+#
+#  redis:
+#    image: redis:7
+#    ports:
+#      - "6380:6379"
+#    volumes:
+#      - redis-data:/data
+#
+# volumes:
+#   mysql-data:
+#   redis-data:

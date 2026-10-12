@@ -84,8 +84,9 @@ class MediaPipePoseEstimator:
         else:
             person_roi = frame
 
-        # 转换为 RGB 并创建 MediaPipe 图像
-        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=person_roi)
+        # OpenCV 读取的是 BGR，MediaPipe 需要 RGB，必须先转换
+        rgb_roi = cv2.cvtColor(person_roi, cv2.COLOR_BGR2RGB)
+        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_roi)
         results = self.detector.detect(mp_image)
 
         if not results.pose_landmarks:

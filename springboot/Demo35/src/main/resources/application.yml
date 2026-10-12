@@ -117,6 +117,8 @@ anythingllm:
 python:
   api:
     url: ${PYTHON_API_URL:http://localhost:5002/api/analyze/frame}
+    # 基础地址（不含路径），供记录查询等接口拼接使用
+    base-url: ${PYTHON_API_BASE_URL:http://localhost:5002}
 
 logging:
   level:

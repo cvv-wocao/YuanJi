@@ -32,8 +32,13 @@ services:
       - .env
 ```
 
-启动：`docker compose --env-file .env up -d`
-根目录 `docker-compose.yml` 已配好 mysql / redis / ai / backend 四个服务，直接 `docker compose up -d --build` 即可。
+启动：`docker compose up -d --build`
+
+根目录 `docker-compose.yml` 已配好 **ai**（Python :5002）与 **backend**（Spring Boot :8080）两个服务：
+
+- MySQL / Redis 复用宿主机已有服务，容器经 `host.docker.internal` 访问（本机 3306 / 6379 已被占用）。
+  需要自包含的 MySQL / Redis 时，取消 `docker-compose.yml` 末尾注释块（映射 3307 / 6380）。
+- `YOLO/best.pt` 未纳入仓库，运行前需存在于本机，编排会将其只读挂载进 ai 容器。
 
 ### 方式 B：docker run --env-file
 
@@ -78,3 +83,4 @@ docker run -e YUANJI_ENV_FILE=/app/.env -v "$PWD/.env:/app/.env:ro" ...
 | `OSS_ENDPOINT` / `OSS_ACCESS_KEY_ID` / `OSS_ACCESS_KEY_SECRET` / `OSS_BUCKET` | 阿里云 OSS |
 | `ANYTHINGLLM_BASE_URL` / `ANYTHINGLLM_API_KEY` / `ANYTHINGLLM_WORKSPACE_SLUG` | AnythingLLM |
 | `SPARK_APP_ID` / `SPARK_API_KEY` / `SPARK_API_SECRET` / `SPARK_URL` / `SPARK_DOMAIN` | 讯飞星火 |
+| `PYTHON_API_URL` / `PYTHON_API_BASE_URL` | Python AI 服务地址（Docker 下为 `http://ai:5002`） |

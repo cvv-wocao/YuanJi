@@ -128,10 +128,15 @@ npm run dev:h5                 # 或 npm run build:h5
 ### 6. Docker（可选）
 
 ```bash
-docker compose --env-file .env up -d
+copy .env.example .env      # 先填好真实密钥
+docker compose up -d --build
 ```
 
-后端与 AI 服务已提供 Dockerfile，编排包含 mysql / redis / ai / backend 四个服务。密钥通过 `env_file` 注入，不会进入镜像。
+- 编排只含两个服务：`backend`（Spring Boot :8080）与 `ai`（Python 姿态分析 :5002）。
+- MySQL / Redis 复用**宿主机**上已有的服务，容器通过 `host.docker.internal` 访问；
+  若需要一套自包含的 MySQL / Redis，见 `docker-compose.yml` 末尾的注释块（映射 3307 / 6380）。
+- YOLO 模型 `YOLO/best.pt` 未纳入仓库，运行前需保证该文件存在于本机（会只读挂载进 ai 容器）。
+- 密钥通过 `env_file: .env` 注入，不会进入镜像；`.env` 已被 `.gitignore` 忽略。
 
 ---
 

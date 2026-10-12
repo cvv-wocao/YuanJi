@@ -7,6 +7,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,7 +17,10 @@ import java.util.Map;
 @Service
 public class ExerciseRecordService {
 
-    private static final String PYTHON_API_URL = "http://localhost:5002";
+    /** Python AI 服务基础地址（不含路径），Docker 下为 http://ai:5002 */
+    @Value("${python.api.base-url}")
+    private String pythonApiBaseUrl;
+
     private static final Map<String, String> EXERCISE_TYPE_MAP = new HashMap<>();
 
     static {
@@ -28,7 +32,7 @@ public class ExerciseRecordService {
     public String getUserExerciseRecords(Long userId, int limit) {
         try {
             RestTemplate restTemplate = new RestTemplate();
-            String url = PYTHON_API_URL + "/api/records?user_id=" + userId + "&limit=" + limit;
+            String url = pythonApiBaseUrl + "/api/records?user_id=" + userId + "&limit=" + limit;
             String response = restTemplate.getForObject(url, String.class);
             System.out.println("获取运动记录响应: " + response);
             return response;
@@ -43,7 +47,7 @@ public class ExerciseRecordService {
         try {
             RestTemplate restTemplate = new RestTemplate();
             // 注意：不再使用 user_id 参数，完全依赖 token 识别用户
-            String url = PYTHON_API_URL + "/api/records?limit=" + limit;
+            String url = pythonApiBaseUrl + "/api/records?limit=" + limit;
 
             HttpHeaders headers = new HttpHeaders();
             if (token != null && !token.isEmpty()) {
