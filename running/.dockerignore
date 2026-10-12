@@ -1,0 +1,10 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.db
+temp_videos/
+temp_video.mp4
+videos/
+*.log

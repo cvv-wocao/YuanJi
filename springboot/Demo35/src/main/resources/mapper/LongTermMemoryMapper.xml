@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.item.demo35.Dao.LongTermMemoryDao">
+
+    <resultMap id="memoryMap" type="com.example.item.demo35.entity.LongTermMemory">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="threadSlug" column="thread_slug"/>
+        <result property="content" column="content"/>
+        <result property="memoryType" column="memory_type"/>
+        <result property="keywords" column="keywords"/>
+        <result property="relevanceScore" column="relevance_score"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.item.demo35.entity.LongTermMemory">
+        INSERT INTO long_term_memory (user_id, thread_slug, content, memory_type, keywords, relevance_score, created_at, updated_at)
+        VALUES (#{userId}, #{threadSlug}, #{content}, #{memoryType}, #{keywords}, #{relevanceScore}, NOW(), NOW())
+    </insert>
+
+    <update id="update" parameterType="com.example.item.demo35.entity.LongTermMemory">
+        UPDATE long_term_memory
+        SET content = #{content},
+            memory_type = #{memoryType},
+            keywords = #{keywords},
+            relevance_score = #{relevanceScore},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM long_term_memory WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" parameterType="java.lang.Long" resultMap="memoryMap">
+        SELECT * FROM long_term_memory WHERE id = #{id}
+    </select>
+
+    <select id="selectByUserId" parameterType="java.lang.Long" resultMap="memoryMap">
+        SELECT * FROM long_term_memory WHERE user_id = #{userId} ORDER BY updated_at DESC
+    </select>
+
+    <select id="selectByUserIdAndType" resultMap="memoryMap">
+        SELECT * FROM long_term_memory 
+        WHERE user_id = #{userId} AND memory_type = #{memoryType} 
+        ORDER BY updated_at DESC
+    </select>
+
+    <select id="searchByKeywords" resultMap="memoryMap">
+        SELECT * FROM long_term_memory 
+        WHERE user_id = #{userId} AND keywords LIKE CONCAT('%', #{keywords}, '%')
+        ORDER BY relevance_score DESC, updated_at DESC
+        LIMIT 10
+    </select>
+
+    <select id="selectRecentByUserId" resultMap="memoryMap">
+        SELECT * FROM long_term_memory 
+        WHERE user_id = #{userId} 
+        ORDER BY updated_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectByUserIdAndThread" resultMap="memoryMap">
+        SELECT * FROM long_term_memory 
+        WHERE user_id = #{userId} AND thread_slug = #{threadSlug}
+        ORDER BY updated_at DESC
+    </select>
+
+    <delete id="deleteByUserId" parameterType="java.lang.Long">
+        DELETE FROM long_term_memory WHERE user_id = #{userId}
+    </delete>
+</mapper>

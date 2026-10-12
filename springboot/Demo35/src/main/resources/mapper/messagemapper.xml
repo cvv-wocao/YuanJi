@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.item.demo35.Dao.MessageDao">
+    <resultMap id="messageMap" type="com.example.item.demo35.entity.Message">
+        <id property="id" column="id"/>
+        <result property="senderId" column="sender_id"/>
+        <result property="receiverId" column="receiver_id"/>
+        <result property="content" column="content"/>
+        <result property="isRead" column="is_read"/>
+        <result property="createTime" column="create_time"/>
+        <association property="sender" javaType="com.example.item.demo35.entity.User">
+            <id property="id" column="sender_id"/>
+            <result property="name" column="sender_name"/>
+            <result property="number" column="sender_number"/>
+            <result property="email" column="sender_email"/>
+            <result property="age" column="sender_age"/>
+            <result property="sex" column="sender_sex"/>
+            <result property="avatar" column="sender_avatar"/>
+        </association>
+        <association property="receiver" javaType="com.example.item.demo35.entity.User">
+            <id property="id" column="receiver_id"/>
+            <result property="name" column="receiver_name"/>
+            <result property="number" column="receiver_number"/>
+            <result property="email" column="receiver_email"/>
+            <result property="age" column="receiver_age"/>
+            <result property="sex" column="receiver_sex"/>
+            <result property="avatar" column="receiver_avatar"/>
+        </association>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO message(sender_id, receiver_id, content, is_read)
+        VALUES(#{senderId}, #{receiverId}, #{content}, #{isRead})
+    </insert>
+
+    <select id="selectById" resultMap="messageMap">
+        SELECT
+            m.*,
+            u1.name AS sender_name,
+            u1.number AS sender_number,
+            u1.email AS sender_email,
+            u1.age AS sender_age,
+            u1.sex AS sender_sex,
+            u1.avatar AS sender_avatar,
+            u2.name AS receiver_name,
+            u2.number AS receiver_number,
+            u2.email AS receiver_email,
+            u2.age AS receiver_age,
+            u2.sex AS receiver_sex,
+            u2.avatar AS receiver_avatar
+        FROM message m
+        LEFT JOIN user u1 ON m.sender_id = u1.id
+        LEFT JOIN user u2 ON m.receiver_id = u2.id
+        WHERE m.id = #{id}
+    </select>
+
+    <select id="selectMessagesBetweenUsers" resultMap="messageMap">
+        SELECT
+            m.*,
+            u1.name AS sender_name,
+            u1.number AS sender_number,
+            u1.email AS sender_email,
+            u1.age AS sender_age,
+            u1.sex AS sender_sex,
+            u1.avatar AS sender_avatar,
+            u2.name AS receiver_name,
+            u2.number AS receiver_number,
+            u2.email AS receiver_email,
+            u2.age AS receiver_age,
+            u2.sex AS receiver_sex,
+            u2.avatar AS receiver_avatar
+        FROM message m
+        LEFT JOIN user u1 ON m.sender_id = u1.id
+        LEFT JOIN user u2 ON m.receiver_id = u2.id
+        WHERE (m.sender_id = #{userId1} AND m.receiver_id = #{userId2})
+           OR (m.sender_id = #{userId2} AND m.receiver_id = #{userId1})
+        ORDER BY m.create_time ASC
+    </select>
+
+    <select id="selectUserConversations" resultMap="messageMap">
+        SELECT
+            m.*,
+            u1.name AS sender_name,
+            u1.number AS sender_number,
+            u1.email AS sender_email,
+            u1.age AS sender_age,
+            u1.sex AS sender_sex,
+            u1.avatar AS sender_avatar,
+            u2.name AS receiver_name,
+            u2.number AS receiver_number,
+            u2.email AS receiver_email,
+            u2.age AS receiver_age,
+            u2.sex AS receiver_sex,
+            u2.avatar AS receiver_avatar
+        FROM message m
+        LEFT JOIN user u1 ON m.sender_id = u1.id
+        LEFT JOIN user u2 ON m.receiver_id = u2.id
+        WHERE m.id IN (
+            SELECT MAX(id) FROM message
+            WHERE sender_id = #{userId} OR receiver_id = #{userId}
+            GROUP BY CASE
+                WHEN sender_id = #{userId} THEN receiver_id
+                ELSE sender_id
+            END
+        )
+        ORDER BY m.create_time DESC
+    </select>
+
+    <select id="countUnreadMessages" resultType="int">
+        SELECT COUNT(*) FROM message
+        WHERE receiver_id = #{userId} AND is_read = 0
+    </select>
+
+    <select id="countUnreadMessagesFromSender" resultType="int">
+        SELECT COUNT(*) FROM message
+        WHERE receiver_id = #{receiverId} AND sender_id = #{senderId} AND is_read = 0
+    </select>
+
+    <update id="markAsRead">
+        UPDATE message SET is_read = 1 WHERE id = #{id}
+    </update>
+
+    <update id="markAllAsRead">
+        UPDATE message SET is_read = 1
+        WHERE receiver_id = #{userId} AND sender_id = #{senderId} AND is_read = 0
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM message WHERE id = #{id}
+    </delete>
+
+    <select id="countMessagesFromTo" resultType="int">
+        SELECT COUNT(*) FROM message
+        WHERE sender_id = #{senderId} AND receiver_id = #{receiverId}
+    </select>
+</mapper>

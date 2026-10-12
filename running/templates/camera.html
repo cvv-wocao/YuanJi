@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跑步姿势识别系统</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .video-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        img {
+            max-width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+        .info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .status {
+            font-weight: bold;
+            color: #28a745;
+        }
+        .error {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>跑步姿势识别系统</h1>
+        
+        <div class="video-container">
+            <img src="{{ url_for('video') }}" alt="实时视频流">
+        </div>
+        
+        <div class="info">
+            <h3>系统状态</h3>
+            <p>📊 <strong>实时跑步姿势分析</strong></p>
+            <p>🎯 检测跑步姿势的正确性</p>
+            <p>💡 提供姿势改进建议</p>
+            <p>📸 支持截图保存</p>
+        </div>
+        
+        <div class="info">
+            <h3>使用说明</h3>
+            <ul>
+                <li>确保摄像头已连接并正常工作</li>
+                <li>站在摄像头前，保持全身可见</li>
+                <li>开始跑步动作，系统会自动分析姿势</li>
+                <li>根据系统反馈调整跑步姿势</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

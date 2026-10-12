@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.item.demo35.Dao.AdminDao">
+    <resultMap id="adminMap" type="com.example.item.demo35.entity.Admin">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="level" column="level"/>
+        <result property="avatar" column="avatar"/>
+    </resultMap>
+
+    <select id="login" resultMap="adminMap">
+        select * from admin where username = #{username} and password = #{password}
+    </select>
+
+    <select id="selectByUsername" resultMap="adminMap">
+        select * from admin where username = #{username}
+    </select>
+
+    <select id="selectAll" resultMap="adminMap">
+        select * from admin
+    </select>
+
+    <select id="selectById" resultMap="adminMap">
+        select * from admin where id = #{id}
+    </select>
+
+    <update id="updateAdmin">
+        update admin
+        <set>
+            <if test="username != null and username != ''">username = #{username},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="email != null and email != ''">email = #{email},</if>
+            <if test="phone != null and phone != ''">phone = #{phone},</if>
+            <if test="level != null">level = #{level},</if>
+            <if test="avatar != null and avatar != ''">avatar = #{avatar},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAdmin">
+        delete from admin where id = #{id}
+    </delete>
+
+    <insert id="createAdmin" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO admin(username, password, email, phone, level, avatar)
+        VALUES(#{username}, #{password}, #{email}, #{phone}, #{level}, #{avatar})
+    </insert>
+
+</mapper>

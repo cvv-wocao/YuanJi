@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.item.demo35.Dao.UserCouponDao">
+    <resultMap id="userCouponMap" type="com.example.item.demo35.entity.UserCoupon">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="couponId" column="coupon_id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="status" column="status"/>
+        <result property="receiveTime" column="receive_time"/>
+        <result property="useTime" column="use_time"/>
+        <result property="expireTime" column="expire_time"/>
+    </resultMap>
+
+    <select id="selectByUserId" resultMap="userCouponMap">
+        select * from user_coupon where user_id = #{userId}
+        <if test="status != null">
+            and status = #{status}
+        </if>
+        order by receive_time desc
+    </select>
+
+    <select id="selectById" resultMap="userCouponMap">
+        select * from user_coupon where id = #{id}
+    </select>
+
+    <select id="selectByUserIdAndCouponId" resultMap="userCouponMap">
+        select * from user_coupon where user_id = #{userId} and coupon_id = #{couponId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into user_coupon(user_id, coupon_id, order_id, status, receive_time, use_time, expire_time)
+        values(#{userId}, #{couponId}, #{orderId}, #{status}, #{receiveTime}, #{useTime}, #{expireTime})
+    </insert>
+
+    <update id="update">
+        update user_coupon
+        <set>
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="useTime != null">use_time = #{useTime},</if>
+            <if test="expireTime != null">expire_time = #{expireTime},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete">
+        delete from user_coupon where id = #{id}
+    </delete>
+</mapper>

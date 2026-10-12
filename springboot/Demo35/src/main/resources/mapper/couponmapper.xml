@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.item.demo35.Dao.CouponDao">
+    <resultMap id="couponMap" type="com.example.item.demo35.entity.Coupon">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="type" column="type"/>
+        <result property="discountAmount" column="discount_amount"/>
+        <result property="discountRate" column="discount_rate"/>
+        <result property="minAmount" column="min_amount"/>
+        <result property="maxDiscount" column="max_discount"/>
+        <result property="totalCount" column="total_count"/>
+        <result property="usedCount" column="used_count"/>
+        <result property="validDays" column="valid_days"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="status" column="status"/>
+        <result property="description" column="description"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectAllCoupons" resultMap="couponMap">
+        select * from coupon where status = 1 order by create_time desc
+    </select>
+
+    <select id="selectAvailableCoupons" resultMap="couponMap">
+        select * from coupon where status = 1 and used_count &lt; total_count
+        <if test="amount != null">
+            and min_amount &lt;= #{amount}
+        </if>
+        and (start_time is null or start_time &lt;= now())
+        and (end_time is null or end_time &gt;= now())
+        order by create_time desc
+    </select>
+
+    <select id="selectById" resultMap="couponMap">
+        select * from coupon where id = #{id}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into coupon(name, type, discount_amount, discount_rate, min_amount, max_discount, total_count, used_count, valid_days, start_time, end_time, status, description)
+        values(#{name}, #{type}, #{discountAmount}, #{discountRate}, #{minAmount}, #{maxDiscount}, #{totalCount}, #{usedCount}, #{validDays}, #{startTime}, #{endTime}, #{status}, #{description})
+    </insert>
+
+    <update id="update">
+        update coupon
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="discountAmount != null">discount_amount = #{discountAmount},</if>
+            <if test="discountRate != null">discount_rate = #{discountRate},</if>
+            <if test="minAmount != null">min_amount = #{minAmount},</if>
+            <if test="maxDiscount != null">max_discount = #{maxDiscount},</if>
+            <if test="totalCount != null">total_count = #{totalCount},</if>
+            <if test="usedCount != null">used_count = #{usedCount},</if>
+            <if test="validDays != null">valid_days = #{validDays},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="description != null">description = #{description},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <update id="updateUsedCount">
+        update coupon set used_count = #{usedCount} where id = #{id}
+    </update>
+
+    <delete id="delete">
+        delete from coupon where id = #{id}
+    </delete>
+</mapper>

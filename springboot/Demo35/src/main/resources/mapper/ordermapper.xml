@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.item.demo35.Dao.OrderDao">
+    <resultMap id="orderMap" type="com.example.item.demo35.entity.Order">
+        <id property="id" column="id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="userId" column="user_id"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="paymentAmount" column="payment_amount"/>
+        <result property="status" column="status"/>
+        <result property="paymentMethod" column="payment_method"/>
+        <result property="paymentTime" column="payment_time"/>
+        <result property="shippingTime" column="shipping_time"/>
+        <result property="receiveTime" column="receive_time"/>
+        <result property="receiverName" column="receiver_name"/>
+        <result property="receiverPhone" column="receiver_phone"/>
+        <result property="receiverAddress" column="receiver_address"/>
+        <result property="remark" column="remark"/>
+        <result property="cancelReason" column="cancel_reason"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectByUserId" resultMap="orderMap">
+        select * from `order` where user_id = #{userId}
+        <if test="status != null">
+            and status = #{status}
+        </if>
+        order by create_time desc
+    </select>
+
+    <select id="selectByOrderNo" resultMap="orderMap">
+        select * from `order` where order_no = #{orderNo}
+    </select>
+
+    <select id="selectById" resultMap="orderMap">
+        select * from `order` where id = #{id}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into `order`(order_no, user_id, total_amount, payment_amount, status, payment_method, payment_time, shipping_time, receive_time, receiver_name, receiver_phone, receiver_address, remark, cancel_reason)
+        values(#{orderNo}, #{userId}, #{totalAmount}, #{paymentAmount}, #{status}, #{paymentMethod}, #{paymentTime}, #{shippingTime}, #{receiveTime}, #{receiverName}, #{receiverPhone}, #{receiverAddress}, #{remark}, #{cancelReason})
+    </insert>
+
+    <update id="update">
+        update `order`
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="paymentMethod != null">payment_method = #{paymentMethod},</if>
+            <if test="paymentTime != null">payment_time = #{paymentTime},</if>
+            <if test="shippingTime != null">shipping_time = #{shippingTime},</if>
+            <if test="receiveTime != null">receive_time = #{receiveTime},</if>
+            <if test="receiverName != null">receiver_name = #{receiverName},</if>
+            <if test="receiverPhone != null">receiver_phone = #{receiverPhone},</if>
+            <if test="receiverAddress != null">receiver_address = #{receiverAddress},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="cancelReason != null">cancel_reason = #{cancelReason},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        update `order` set status = #{status} where order_no = #{orderNo}
+    </update>
+
+    <delete id="delete">
+        delete from `order` where order_no = #{orderNo}
+    </delete>
+
+<!--    =======================================================================================-->
+    <select id="selectAllOrders" resultMap="orderMap">
+        select * from `order`
+        <where>
+            <if test="params.orderNo != null and params.orderNo != ''">
+                and order_no like concat('%', #{params.orderNo}, '%')
+            </if>
+            <if test="params.status != null">
+                and status = #{params.status}
+            </if>
+            <if test="params.receiverName != null and params.receiverName != ''">
+                and receiver_name like concat('%', #{params.receiverName}, '%')
+            </if>
+            <if test="params.receiverPhone != null and params.receiverPhone != ''">
+                and receiver_phone = #{params.receiverPhone}
+            </if>
+            <if test="params.startDate != null and params.startDate != ''">
+                and create_time >= #{params.startDate}
+            </if>
+            <if test="params.endDate != null and params.endDate != ''">
+                and create_time &lt;= #{params.endDate}
+            </if>
+        </where>
+        order by create_time desc
+        limit #{offset}, #{limit}
+    </select>
+
+    <!-- 统计所有订单总数 -->
+    <select id="countAllOrders" resultType="long">
+        select count(*) from `order`
+        <where>
+            <if test="params.orderNo != null and params.orderNo != ''">
+                and order_no like concat('%', #{params.orderNo}, '%')
+            </if>
+            <if test="params.status != null">
+                and status = #{params.status}
+            </if>
+            <if test="params.receiverName != null and params.receiverName != ''">
+                and receiver_name like concat('%', #{params.receiverName}, '%')
+            </if>
+            <if test="params.receiverPhone != null and params.receiverPhone != ''">
+                and receiver_phone = #{params.receiverPhone}
+            </if>
+            <if test="params.startDate != null and params.startDate != ''">
+                and create_time >= #{params.startDate}
+            </if>
+            <if test="params.endDate != null and params.endDate != ''">
+                and create_time &lt;= #{params.endDate}
+            </if>
+        </where>
+    </select>
+
+    <!-- 根据用户ID查询订单 -->
+    <select id="selectOrdersByUserId" resultMap="orderMap">
+        select * from `order`
+        <where>
+            user_id = #{params.userId}
+            <if test="params.status != null">
+                and status = #{params.status}
+            </if>
+        </where>
+        order by create_time desc
+        limit #{offset}, #{limit}
+    </select>
+
+    <!-- 统计用户订单总数 -->
+    <select id="countOrdersByUserId" resultType="long">
+        select count(*) from `order`
+        where user_id = #{userId}
+        <if test="status != null">
+            and status = #{status}
+        </if>
+    </select>
+
+    <!-- 统计总订单数（带日期范围） -->
+    <select id="countTotalOrders" resultType="long">
+        select count(*) from `order`
+        <where>
+            <if test="startTime != null">
+                and create_time >= #{startTime}
+            </if>
+            <if test="endTime != null">
+                and create_time &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <!-- 统计总销售额（带日期范围） -->
+    <select id="sumTotalAmount" resultType="java.math.BigDecimal">
+        select ifnull(sum(total_amount), 0) from `order`
+        <where>
+            status in (2, 3)
+            <if test="startTime != null">
+                and create_time >= #{startTime}
+            </if>
+            <if test="endTime != null">
+                and create_time &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <!-- 按状态分组统计订单数（带日期范围） -->
+    <select id="countOrdersGroupByStatusWithDate" resultType="java.util.HashMap">
+        select CAST(status AS SIGNED) as status, count(*) as count from `order`
+        <where>
+            <if test="startTime != null">
+                and create_time >= #{startTime}
+            </if>
+            <if test="endTime != null">
+                and create_time &lt;= #{endTime}
+            </if>
+        </where>
+        group by status
+    </select>
+    <!--    =======================================================================================-->
+</mapper>

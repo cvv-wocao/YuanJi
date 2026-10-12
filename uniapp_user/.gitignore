@@ -1,0 +1,24 @@
+# ===== 敏感配置 =====
+.env
+.env.*
+!.env.example
+
+# ===== 依赖 / 构建产物 =====
+node_modules/
+unpackage/
+dist/
+.hbuilderx/
+
+# ===== 大文件 / 打包产物 =====
+*.zip
+*.apk
+*.ipa
+*.mp4
+*.db
+
+# ===== IDE / 系统 =====
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.item.demo35.Dao.FollowDao">
+    <resultMap id="followMap" type="com.example.item.demo35.entity.Follow">
+        <id property="id" column="id"/>
+        <result property="followerId" column="follower_id"/>
+        <result property="followingId" column="following_id"/>
+        <result property="createTime" column="create_time"/>
+        <association property="follower" javaType="com.example.item.demo35.entity.User">
+            <id property="id" column="follower_id"/>
+            <result property="name" column="follower_name"/>
+            <result property="number" column="follower_number"/>
+            <result property="email" column="follower_email"/>
+            <result property="age" column="follower_age"/>
+            <result property="sex" column="follower_sex"/>
+            <result property="avatar" column="follower_avatar"/>
+        </association>
+        <association property="following" javaType="com.example.item.demo35.entity.User">
+            <id property="id" column="following_id"/>
+            <result property="name" column="following_name"/>
+            <result property="number" column="following_number"/>
+            <result property="email" column="following_email"/>
+            <result property="age" column="following_age"/>
+            <result property="sex" column="following_sex"/>
+            <result property="avatar" column="following_avatar"/>
+        </association>
+    </resultMap>
+
+    <insert id="follow">
+        INSERT INTO follow(follower_id, following_id)
+        VALUES(#{followerId}, #{followingId})
+    </insert>
+
+    <delete id="unfollow">
+        DELETE FROM follow WHERE follower_id = #{followerId} AND following_id = #{followingId}
+    </delete>
+
+    <select id="selectByFollowerAndFollowing" resultMap="followMap">
+        SELECT
+            f.*,
+            u1.name AS follower_name,
+            u1.number AS follower_number,
+            u1.email AS follower_email,
+            u1.age AS follower_age,
+            u1.sex AS follower_sex,
+            u1.avatar AS follower_avatar,
+            u2.name AS following_name,
+            u2.number AS following_number,
+            u2.email AS following_email,
+            u2.age AS following_age,
+            u2.sex AS following_sex,
+            u2.avatar AS following_avatar
+        FROM follow f
+        LEFT JOIN user u1 ON f.follower_id = u1.id
+        LEFT JOIN user u2 ON f.following_id = u2.id
+        WHERE f.follower_id = #{followerId} AND f.following_id = #{followingId}
+    </select>
+
+    <select id="selectFollowers" resultMap="followMap">
+        SELECT
+            f.*,
+            u1.name AS follower_name,
+            u1.number AS follower_number,
+            u1.email AS follower_email,
+            u1.age AS follower_age,
+            u1.sex AS follower_sex,
+            u1.avatar AS follower_avatar,
+            u2.name AS following_name,
+            u2.number AS following_number,
+            u2.email AS following_email,
+            u2.age AS following_age,
+            u2.sex AS following_sex,
+            u2.avatar AS following_avatar
+        FROM follow f
+        LEFT JOIN user u1 ON f.follower_id = u1.id
+        LEFT JOIN user u2 ON f.following_id = u2.id
+        WHERE f.following_id = #{followingId}
+        ORDER BY f.create_time DESC
+    </select>
+
+    <select id="selectFollowing" resultMap="followMap">
+        SELECT
+            f.*,
+            u1.name AS follower_name,
+            u1.number AS follower_number,
+            u1.email AS follower_email,
+            u1.age AS follower_age,
+            u1.sex AS follower_sex,
+            u1.avatar AS follower_avatar,
+            u2.name AS following_name,
+            u2.number AS following_number,
+            u2.email AS following_email,
+            u2.age AS following_age,
+            u2.sex AS following_sex,
+            u2.avatar AS following_avatar
+        FROM follow f
+        LEFT JOIN user u1 ON f.follower_id = u1.id
+        LEFT JOIN user u2 ON f.following_id = u2.id
+        WHERE f.follower_id = #{followerId}
+        ORDER BY f.create_time DESC
+    </select>
+
+    <select id="isFollowing" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM follow 
+        WHERE follower_id = #{followerId} AND following_id = #{followingId}
+    </select>
+
+    <select id="countFollowers" resultType="int">
+        SELECT COUNT(*) FROM follow WHERE following_id = #{followingId}
+    </select>
+
+    <select id="countFollowing" resultType="int">
+        SELECT COUNT(*) FROM follow WHERE follower_id = #{followerId}
+    </select>
+</mapper>

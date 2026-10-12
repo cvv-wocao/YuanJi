@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.item.demo35.Dao.UserDao">
+    <resultMap id="userMap" type="com.example.item.demo35.entity.User">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="password" column="password"/>
+        <result property="number" column="number"/>
+        <result property="email" column="email"/>
+        <result property="age" column="age"/>
+        <result property="sex" column="sex"/>
+        <result property="avatar" column="avatar"/>
+    </resultMap>
+
+    <select id="SelectUserByNamePassword" resultMap="userMap">
+        select * from user where name = #{name} and password = #{password}
+    </select>
+
+    <select id="login" resultMap="userMap">
+        select * from user where number = #{number} and password = #{password}
+    </select>
+
+    <insert id="register" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user(name, password, number, email, age, sex, avatar)
+        VALUES(#{name}, #{password}, #{number}, #{email}, #{age}, #{sex}, #{avatar})
+    </insert>
+
+    <select id="selectByName" resultMap="userMap">
+        select * from user where name = #{name}
+    </select>
+
+    <select id="selectAllUsers" resultMap="userMap">
+        select * from user
+    </select>
+
+    <select id="selectById" resultMap="userMap">
+        select * from user where id = #{id}
+    </select>
+
+    <update id="updateUser">
+        update user
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="number != null">number = #{number},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="age != null">age = #{age},</if>
+            <if test="sex != null">sex = #{sex},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteUser">
+        delete from user where id = #{id}
+    </delete>
+
+    <select id="countUsers" resultType="Integer">
+        select count(*) from user
+    </select>
+
+</mapper>

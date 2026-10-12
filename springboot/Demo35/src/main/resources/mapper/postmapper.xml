@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.item.demo35.Dao.PostDao">
+    <resultMap id="postMap" type="com.example.item.demo35.entity.Post">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="content" column="content"/>
+        <result property="images" column="images" typeHandler="com.example.item.demo35.util.JsonListTypeHandler"/>
+        <result property="videos" column="videos" typeHandler="com.example.item.demo35.util.JsonListTypeHandler"/>
+        <result property="cover" column="cover"/>
+        <result property="likeCount" column="like_count"/>
+        <result property="commentCount" column="comment_count"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <association property="user" javaType="com.example.item.demo35.entity.User">
+            <id property="id" column="user_id"/>
+            <result property="name" column="user_name"/>
+            <result property="number" column="user_number"/>
+            <result property="email" column="user_email"/>
+            <result property="age" column="user_age"/>
+            <result property="sex" column="user_sex"/>
+            <result property="avatar" column="user_avatar"/>
+        </association>
+    </resultMap>
+
+    <insert id="createPost" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO post(user_id, content, images, videos, cover, like_count, comment_count)
+        VALUES(#{userId}, #{content}, #{images, typeHandler=com.example.item.demo35.util.JsonListTypeHandler}, #{videos, typeHandler=com.example.item.demo35.util.JsonListTypeHandler}, #{cover}, 0, 0)
+    </insert>
+
+    <update id="updatePost">
+        UPDATE post
+        <set>
+            <if test="content != null and content != ''">content = #{content},</if>
+            <if test="images != null">images = #{images, typeHandler=com.example.item.demo35.util.JsonListTypeHandler},</if>
+            <if test="likeCount != null">like_count = #{likeCount},</if>
+            <if test="commentCount != null">comment_count = #{commentCount},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deletePost">
+        DELETE FROM post WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" resultMap="postMap">
+        SELECT
+            p.*,
+            u.name AS user_name,
+            u.number AS user_number,
+            u.email AS user_email,
+            u.age AS user_age,
+            u.sex AS user_sex,
+            u.avatar AS user_avatar
+        FROM post p
+        LEFT JOIN user u ON p.user_id = u.id
+        WHERE p.id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="postMap">
+        SELECT
+            p.*,
+            u.name AS user_name,
+            u.number AS user_number,
+            u.email AS user_email,
+            u.age AS user_age,
+            u.sex AS user_sex,
+            u.avatar AS user_avatar
+        FROM post p
+        LEFT JOIN user u ON p.user_id = u.id
+        <if test="userId != null">
+            WHERE p.user_id = #{userId}
+        </if>
+        ORDER BY p.create_time DESC
+    </select>
+
+    <select id="selectByUserId" resultMap="postMap">
+        SELECT
+            p.*,
+            u.name AS user_name,
+            u.number AS user_number,
+            u.email AS user_email,
+            u.age AS user_age,
+            u.sex AS user_sex,
+            u.avatar AS user_avatar
+        FROM post p
+        LEFT JOIN user u ON p.user_id = u.id
+        WHERE p.user_id = #{userId}
+        ORDER BY p.create_time DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="selectByPage" resultMap="postMap">
+        SELECT
+            p.*,
+            u.name AS user_name,
+            u.number AS user_number,
+            u.email AS user_email,
+            u.age AS user_age,
+            u.sex AS user_sex,
+            u.avatar AS user_avatar
+        FROM post p
+        LEFT JOIN user u ON p.user_id = u.id
+        ORDER BY p.create_time DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countByUserId" resultType="int">
+        SELECT COUNT(*) FROM post WHERE user_id = #{userId}
+    </select>
+
+    <select id="countAll" resultType="Integer">
+        SELECT COUNT(*) FROM post
+    </select>
+
+    <select id="countPosts" resultType="Integer">
+        SELECT COUNT(*) FROM post
+    </select>
+
+    <select id="sumLikeCountByUserId" resultType="int">
+        SELECT SUM(like_count) FROM post WHERE user_id = #{userId}
+    </select>
+
+    <update id="incrementLikeCount">
+        UPDATE post SET like_count = like_count + 1 WHERE id = #{id}
+    </update>
+
+    <update id="decrementLikeCount">
+        UPDATE post SET like_count = like_count - 1 WHERE id = #{id} AND like_count > 0
+    </update>
+
+    <update id="incrementCommentCount">
+        UPDATE post SET comment_count = comment_count + 1 WHERE id = #{id}
+    </update>
+
+    <update id="decrementCommentCount">
+        UPDATE post SET comment_count = comment_count - 1 WHERE id = #{id} AND comment_count > 0
+    </update>
+</mapper>
